@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shiriki Pay - Global</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #006b20;
+      color: white;
+      min-height: 100vh;
+    }
+
+    /* Subtle grid from the screenshot */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .screen {
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Loading screen */
+    #loadingScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .top {
+      width: 100%;
+      padding: 28px 42px;
+    }
+
+    .brand {
+      color: #111;
+      font-size: 27px;
+      font-weight: 700;
+    }
+
+    .loader-content {
+      margin-top: 360px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 95px;
+      height: 70px;
+      margin: 0 auto 35px;
+      position: relative;
+    }
+
+    .logo-shape {
+      position: absolute;
+      background: #f5002d;
+      transform: skewX(-25deg);
+    }
+
+    .shape1 {
+      width: 65px;
+      height: 38px;
+      right: 3px;
+      top: 5px;
+      border-radius: 0 0 45px 0;
+    }
+
+    .shape2 {
+      width: 45px;
+      height: 38px;
+      left: 15px;
+      top: 27px;
+      border-radius: 0 0 35px 0;
+    }
+
+    h1 {
+      font-size: 31px;
+      margin-bottom: 55px;
+      font-weight: 700;
+    }
+
+    .spinner {
+      width: 80px;
+      height: 80px;
+      border: 7px dotted rgba(255,255,255,.8);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Form screen */
+    #formScreen {
+      display: none;
+      padding: 40px 25px;
+    }
+
+    .form-box {
+      width: 100%;
+      max-width: 480px;
+      margin: 70px auto;
+      background: white;
+      color: #222;
+      padding: 30px 25px;
+      border-radius: 18px;
+      box-shadow: 0 10px 35px rgba(0,0,0,.25);
+    }
+
+    .form-box h2 {
+      color: #006b20;
+      font-size: 27px;
+      margin-bottom: 8px;
+    }
+
+    .demo-label {
+      display: inline-block;
+      background: #eee;
+      color: #555;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #ccc;
+      border-radius: 9px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #006b20;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 9px;
+      background: #006b20;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    button:active {
+      transform: scale(.98);
+    }
+
+    .notice {
+      margin-top: 15px;
+      text-align: center;
+      color: #777;
+      font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .top {
+        padding: 30px 42px;
+      }
+
+      .loader-content {
+        margin-top: 360px;
+      }
+
+      h1 {
+        font-size: 27px;
+      }
+    }
+    /* BEAUTIFUL SUCCESS POPUP */
+
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn .25s ease;
+}
+
+.success-box {
+  width: 100%;
+  max-width: 380px;
+  background: white;
+  color: #222;
+  border-radius: 24px;
+  padding: 35px 25px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  animation: popIn .35s ease;
+}
+
+.success-icon {
+  width: 75px;
+  height: 75px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: #006b20;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 45px;
+  font-weight: bold;
+}
+
+.success-box h2 {
+  color: #006b20;
+  margin-bottom: 12px;
+  font-size: 25px;
+}
+
+.success-box p {
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+.success-box button {
+  background: #006b20;
+}
+
+
+/* INSTRUCTION PAGE */
+
+#instructionScreen {
+  display: block;
+  padding: 30px 20px;
+}
+
+.instruction-box {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  background: white;
+  color: #222;
+  padding: 28px 22px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+
+.instruction-logo {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: #006b20;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 27px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+.instruction-box h2 {
+  color: #006b20;
+  font-size: 25px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+.step {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.step > span {
+  min-width: 32px;
+  height: 32px;
+  background: #006b20;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.step p {
+  color: #333;
+  line-height: 1.45;
+  padding-top: 5px;
+}
+
+.security-warning {
+  margin: 22px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffe69c;
+}
+
+.security-warning strong {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.security-warning p {
+  line-height: 1.45;
+  font-size: 14px;
+}
+
+.done-button {
+  margin-top: 25px;
+}
+
+
+@keyframes popIn {
+  from {
+    transform: scale(.75);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+  </style>
+</head>
+
+<body>
+
+  <!-- LOADING SCREEN -->
+  <section id="loadingScreen" class="screen">
+
+    <div class="top">
+      <div class="brand">Shiriki Pay Global</div>
+    </div>
+
+    <div class="loader-content">
+
+      <div class="logo">
+        <div class="logo-shape shape1"></div>
+        <div class="logo-shape shape2"></div>
+      </div>
+
+      <h1>WELCOME TO SHIRIKI PAY GLOBAL</h1>
+
+      <div class="spinner"></div>
+
+    </div>
+  </section>
+
+
+  <!-- FORM SCREEN -->
+  <section id="formScreen" class="screen">
+
+    <div class="form-box">
+
+      <h2>Welcome</h2>
+
+      <span class="demo-label">USER</span>
+
+      <form id="demoForm">
+
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            placeholder="Enter your full name"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select id="country" required>
+            <option value="">Select your country</option>
+            <option>Kenya</option>
+            <option>Uganda</option>
+            <option>Tanzania</option>
+            <option>Rwanda</option>
+            <option>United States</option>
+            <option>United Kingdom</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            placeholder="Enter phone number"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="Enter email address"
+            required
+          >
+        </div>
+
+        <button type="submit">Continue</button>
+
+        <p class="notice">
+          
+        </p>
+
+      </form>
+    </div>
+
+  </section>
+
+
+  <script>
+  // Show form after 3 seconds
+  setTimeout(function () {
+    document.getElementById("loadingScreen").style.display = "none";
+    document.getElementById("formScreen").style.display = "block";
+  }, 3000);
+
+
+  // Beautiful success popup
+  document.getElementById("demoForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const popup = document.createElement("div");
+
+    popup.innerHTML = `
+      <div class="success-overlay">
+        <div class="success-box">
+          <div class="success-icon">✓</div>
+
+          <h2>Details Completed</h2>
+
+          <p>
+            Your registration details have been received
+            successfully.
+          </p>
+
+          <button id="continueBtn">
+            Continue
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    document.getElementById("continueBtn").onclick = function() {
+      popup.remove();
+      showInstructions();
+    };
+  });
+
+
+  function showInstructions() {
+
+    document.getElementById("formScreen").style.display = "none";
+
+    const page = document.createElement("section");
+
+    page.id = "instructionScreen";
+    page.className = "screen";
+
+    page.innerHTML = `
+      <div class="instruction-box">
+
+        <div class="instruction-logo">S</div>
+
+        <h2>Global Payment Registration</h2>
+
+        <p class="subtitle">
+          Follow the instructions below to complete the
+          Shiriki Pay demo registration.
+        </p>
+
+        <div class="step">
+          <span>1</span>
+          <p>Dial <strong>*334#</strong> from your safaricom (m-pesa line) line.</p>
+        </div>
+
+        <div class="step">
+          <span>2</span>
+          <p>
+            Choose the option for
+            <strong>Shiriki Pay(option 14)</strong>.
+          </p>
+        </div>
+
+        <div class="step">
+          <span>3</span>
+          <p>
+            Select <strong>Opt in</strong> if you are not already
+            a member.
+          </p>
+        </div>
+
+        <div class="step">
+          <span>4</span>
+          <p>
+            Add shiriki pay user. (option 5)
+          </p>
+        </div>
+
+        <div class="step">
+          <span>5</span>
+          <p>
+            Enter phone number (0726505670) This is a registered global kenyan assistant
+          </p>
+        </div>
+
+        <div class="step">
+          <span>6</span>
+          <p>
+            Set  monthly transaction limit kes 20000.Do not exceed this amount.
+          </p>
+        </div>
+
+         <div class="step">
+          <span>7</span>
+          <p>
+            Enter pin (To connect your M-pesa with shiriki global.)
+          </p>
+        </div>
+
+         <div class="step">
+          <span>8</span>
+          <p>
+           Press 1. to complete.
+          </p>
+        </div>
+
+
+        <button id="doneBtn" class="done-button">
+          Done
+        </button>
+
+      </div>
+    `;
+
+    document.body.appendChild(page);
+
+    document.getElementById("doneBtn").onclick = function() {
+      showFinalMessage();
+    };
+  }
+
+
+  function showFinalMessage() {
+
+    const popup = document.createElement("div");
+
+    popup.innerHTML = `
+      <div class="success-overlay">
+        <div class="success-box">
+
+          <div class="success-icon">✓</div>
+
+          <h2>Registration Complete</h2>
+
+          <p>
+            The demo registration process has been completed.
+          </p>
+
+          <button onclick="this.closest('.success-overlay').remove()">
+            Finish
+          </button>
+
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+  }
+  </script>
+
+</body>
+</html>
